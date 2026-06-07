@@ -1,3 +1,4 @@
+
 :root {
     --bg-main: #f4f6f8;
     --bg-card: #ffffff;
@@ -102,6 +103,7 @@ body {
 }
 .api-card { padding: 15px 25px; border-left: 5px solid var(--accent); }
 .card-title { font-size: 1.3rem; margin-bottom: 20px; color: var(--primary); border-bottom: 2px solid var(--border-color); padding-bottom: 8px; }
+.card-inner-box { background: var(--bg-main); padding: 15px; border-radius: 8px; border: 1px dashed var(--border-color); }
 
 .form-group { margin-bottom: 18px; }
 label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; }
@@ -113,7 +115,7 @@ input[type="text"], input[type="password"], input[type="number"], select {
     padding: 10px 14px;
     border: 1px solid var(--border-color);
     border-radius: 6px;
-    background-color: var(--bg-main);
+    background-color: var(--bg-card);
     color: var(--text-primary);
     font-size: 1rem;
     outline: none;
@@ -121,41 +123,63 @@ input[type="text"], input[type="password"], input[type="number"], select {
 }
 input:focus, select:focus { border-color: var(--primary); }
 
-/* 重量動態欄位排版 */
-.weight-container {
-    background-color: var(--bg-main);
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+/* 🔥 新功能：橫向動態輸入框排版 */
+.dynamic-input-row {
     display: flex;
-    flex-direction: column;
     gap: 10px;
-}
-.weight-row {
-    display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    background: var(--bg-card);
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
 }
-.weight-label { font-weight: bold; font-size: 0.9rem; color: var(--text-secondary); min-width: 80px; }
-.weight-input-wrapper { display: flex; align-items: center; gap: 5px; width: 120px; }
-.weight-input-wrapper input { padding: 6px 10px; font-size: 0.9rem; text-align: right; }
+.dynamic-input-row input[type="text"] { flex: 2; }
+.input-unit-group { position: relative; flex: 1; display: flex; align-items: center; }
+.input-unit-group input { padding-right: 45px !important; text-align: right; }
+.unit-text { position: absolute; right: 10px; color: var(--text-muted); font-size: 0.85rem; pointer-events: none; }
+.dynamic-input-row .btn { width: auto; white-space: nowrap; padding: 10px 15px; }
 
-/* 冰箱欄位排版 */
-.fridge-input-container {
-    display: flex;
-    gap: 10px;
+/* 食材資料表格樣式 */
+.table-wrapper {
+    max-height: 180px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-card);
 }
+.ingredient-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+.ingredient-table th, .ingredient-table td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+.ingredient-table th {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    font-weight: 600;
+}
+.btn-delete-row {
+    background: none;
+    border: none;
+    color: var(--danger);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+.btn-delete-row:hover { background-color: rgba(231, 76, 60, 0.1); }
+
+/* 冰箱外觀 */
+.fridge-input-container { display: flex; gap: 10px; }
 .fridge-input-container input[type="text"] { flex: 2; }
 .fridge-input-container input[type="number"] { flex: 1; }
 
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-@media (max-width: 576px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+@media (max-width: 576px) { .grid-2, .grid-3, .dynamic-input-row { grid-template-columns: 1fr; flex-direction: column; align-items: stretch; } .dynamic-input-row .btn { width: 100%; } }
 
 .checkbox-grid {
     display: grid;
