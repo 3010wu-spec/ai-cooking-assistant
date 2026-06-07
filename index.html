@@ -3,200 +3,274 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 料理小幫手 - 智慧食譜與營養分析系統</title>
+    <title>AI 料理小幫手 - 智慧食譜與一週規劃整合平台</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header class="navbar">
         <div class="nav-container">
-            <div class="logo">🍳 AI 料理小幫手</div>
+            <div class="logo">🍳 AI 料理小幫手 Pro</div>
             <div class="nav-controls">
                 <button id="theme-toggle" class="btn-icon" title="切換深淺模式">🌓</button>
             </div>
         </div>
     </header>
 
+    <div class="tab-container">
+        <button class="tab-btn active" data-tab="tab-instant">🍳 即時料理推薦</button>
+        <button class="tab-btn" data-tab="tab-fridge">🧊 冰箱模式 / 一週菜單</button>
+    </div>
+
     <main class="main-container">
         <section class="config-section">
-            <form id="recipe-form" class="card">
-                <h2 class="card-title">🛠️ 料理條件設定</h2>
-                
-                <div class="form-group">
+            
+            <div class="card api-card">
+                <div class="form-group margin-b-0">
                     <label for="api-key">Gemini API Key <span class="required">*</span></label>
-                    <input type="password" id="api-key" placeholder="請輸入您的 Gemini API Key (將儲存於您的瀏覽器)" required>
-                    <small class="help-text">此專案直接於前端呼叫 API，Key 僅保存在您的本地瀏覽器空間中。</small>
+                    <input type="password" id="api-key" placeholder="請輸入您的 Gemini API Key" required>
+                    <small class="help-text">密鑰直接由前端發送至 Google 伺服器，安全保存在您的本地瀏覽器中。</small>
                 </div>
+            </div>
 
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label for="cuisine-type">料理種類</label>
-                        <select id="cuisine-type">
-                            <option value="全部">全部</option>
-                            <option value="台式">台式</option>
-                            <option value="中式">中式</option>
-                            <option value="日式">日式</option>
-                            <option value="西式">西式</option>
-                            <option value="東南亞">東南亞</option>
-                            <option value="其他">其他</option>
-                        </select>
+            <div id="tab-instant" class="tab-content active">
+                <form id="recipe-form" class="card">
+                    <h2 class="card-title">🛠️ 即時料理條件設定</h2>
+                    
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="cuisine-type">料理種類</label>
+                            <select id="cuisine-type">
+                                <option value="全部">全部</option>
+                                <option value="台式">台式</option>
+                                <option value="中式">中式</option>
+                                <option value="日式">日式</option>
+                                <option value="西式">西式</option>
+                                <option value="東南亞">東南亞</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="meal-period">用餐時段</label>
+                            <select id="meal-period">
+                                <option value="早餐">早餐</option>
+                                <option value="午餐" selected>午餐</option>
+                                <option value="晚餐">晚餐</option>
+                                <option value="宵夜">宵夜</option>
+                                <option value="點心">點心</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="meal-period">用餐時段</label>
-                        <select id="meal-period">
-                            <option value="早餐">早餐</option>
-                            <option value="午餐" selected>午餐</option>
-                            <option value="晚餐">晚餐</option>
-                            <option value="宵夜">宵夜</option>
-                            <option value="點心">點心</option>
-                        </select>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="budget">預算限制 (TWD) <span class="required">*</span></label>
+                            <input type="number" id="budget" placeholder="例如：200" value="200" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="available-time">可用時間</label>
+                            <select id="available-time">
+                                <option value="10分鐘">10分鐘</option>
+                                <option value="20分鐘">20分鐘</option>
+                                <option value="30分鐘" selected>30分鐘</option>
+                                <option value="60分鐘">60分鐘</option>
+                                <option value="120分鐘">120分鐘</option>
+                            </select>
+                        </div>
                     </div>
+
+                    <div class="form-group">
+                        <label for="ingredients">現有食材 <span class="required">*</span></label>
+                        <input type="text" id="ingredients" placeholder="例如：雞蛋、洋蔥、高麗菜、豬肉" value="雞蛋、洋蔥、高麗菜、豬肉" required>
+                    </div>
+
+                    <div class="grid-3">
+                        <div class="form-group">
+                            <label for="servings">料理份數</label>
+                            <select id="servings">
+                                <option value="1人">1人</option>
+                                <option value="2人" selected>2人</option>
+                                <option value="3人">3人</option>
+                                <option value="4人">4人</option>
+                                <option value="5人">5人</option>
+                                <option value="6人以上">6人以上</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="taste-profile">預期口味</label>
+                            <select id="taste-profile">
+                                <option value="一般" selected>一般</option>
+                                <option value="清淡">清淡</option>
+                                <option value="濃郁">濃郁</option>
+                                <option value="偏甜">偏甜</option>
+                                <option value="偏鹹">偏鹹</option>
+                                <option value="偏辣">偏辣</option>
+                                <option value="麻辣">麻辣</option>
+                                <option value="酸甜">酸甜</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="target-audience">料理對象</label>
+                            <select id="target-audience">
+                                <option value="自己" selected>自己</option>
+                                <option value="家人">家人</option>
+                                <option value="長輩">長輩</option>
+                                <option value="小孩">小孩</option>
+                                <option value="同學">同學</option>
+                                <option value="朋友">朋友</option>
+                                <option value="伴侶">伴侶</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="ai-mode">AI 導航模式</label>
+                            <select id="ai-mode">
+                                <option value="一般模式" selected>一般模式 (標準料理流程)</option>
+                                <option value="新手模式">新手模式 (步驟超詳細、高容錯)</option>
+                                <option value="專業模式">專業模式 (深度食品科學與原理)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="allergy-exclude">過敏原排除</label>
+                            <select id="allergy-exclude">
+                                <option value="無" selected>無特殊過敏原</option>
+                                <option value="海鮮">排除海鮮</option>
+                                <option value="堅果/花生">排除堅果與花生</option>
+                                <option value="乳製品">排除乳製品</option>
+                                <option value="蛋類">排除蛋類</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>擁有設備 (可複選)</label>
+                        <div class="checkbox-grid">
+                            <label class="checkbox-item"><input type="checkbox" name="equipment" value="電鍋"> 電鍋</label>
+                            <label class="checkbox-item"><input type="checkbox" name="equipment" value="氣炸鍋"> 氣炸鍋</label>
+                            <label class="checkbox-item"><input type="checkbox" name="equipment" value="微波爐"> 微波爐</label>
+                            <label class="checkbox-item"><input type="checkbox" name="equipment" value="平底鍋" checked> 平底鍋</label>
+                            <label class="checkbox-item"><input type="checkbox" name="equipment" value="炒鍋" checked> 炒鍋</label>
+                            <label class="checkbox-item"><input type="checkbox" name="equipment" value="烤箱"> 烤箱</label>
+                            <label class="checkbox-item"><input type="checkbox" name="equipment" value="電磁爐"> 電磁爐</label>
+                            <label class="checkbox-item"><input type="checkbox" name="equipment" value="壓力鍋"> 壓力鍋</label>
+                            <label class="checkbox-item"><input type="checkbox" name="equipment" value="慢燉鍋"> 慢燉鍋</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>營養與健康目標 (可複選)</label>
+                        <div class="checkbox-grid">
+                            <label class="checkbox-item"><input type="checkbox" name="nutrition" value="高蛋白"> 高蛋白</label>
+                            <label class="checkbox-item"><input type="checkbox" name="nutrition" value="增肌"> 增肌</label>
+                            <label class="checkbox-item"><input type="checkbox" name="nutrition" value="減脂"> 減脂</label>
+                            <label class="checkbox-item"><input type="checkbox" name="nutrition" value="減醣"> 減醣</label>
+                            <label class="checkbox-item"><input type="checkbox" name="nutrition" value="高纖"> 高纖</label>
+                            <label class="checkbox-item"><input type="checkbox" name="nutrition" value="低鈉"> 低鈉</label>
+                            <label class="checkbox-item"><input type="checkbox" name="nutrition" value="低熱量"> 低熱量</label>
+                            <label class="checkbox-item"><input type="checkbox" name="nutrition" value="高熱量"> 高熱量</label>
+                            <label class="checkbox-item"><input type="checkbox" name="nutrition" value="素食"> 素食</label>
+                            <label class="checkbox-item"><input type="checkbox" name="nutrition" value="蛋奶素"> 蛋奶素</label>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-submit" class="btn btn-primary">🔍 1. 分析並探索可行方案</button>
+                </form>
+            </div>
+
+            <div id="tab-fridge" class="tab-content">
+                <div class="card">
+                    <h2 class="card-title">🧊 冰箱料理規劃器</h2>
+                    <p class="text-secondary margin-b-15">輸入您冰箱內現有的所有食材，AI 幫您規劃一週（7天）且不浪費的完整套餐與採買清單。</p>
+                    
+                    <div class="form-group">
+                        <label for="fridge-input">管理冰箱食材</label>
+                        <div class="input-btn-group">
+                            <input type="text" id="fridge-input" placeholder="輸入食材名稱，例如：牛肉、青江菜、豆腐">
+                            <button type="button" id="btn-add-fridge" class="btn btn-secondary btn-sm" style="width: auto; white-space: nowrap;">➕ 新增</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>目前冰箱清單（優先使用項目）：</label>
+                        <div id="fridge-tags-container" class="tags-container">
+                            </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="fridge-budget">一週總預算上限</label>
+                            <input type="number" id="fridge-budget" value="2000" min="500">
+                        </div>
+                        <div class="form-group">
+                            <label for="fridge-mode">烹飪導向模式</label>
+                            <select id="fridge-mode">
+                                <option value="平衡模式" selected>營養與口味平衡</option>
+                                <option value="嚴格減脂模式">高纖減脂控糖</option>
+                                <option value="高CP值省錢模式">最大化省錢小資</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="button" id="btn-generate-week" class="btn btn-success">📅 生成智慧一週菜單與分析</button>
                 </div>
+            </div>
 
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label for="budget">預算限制 (TWD) <span class="required">*</span></label>
-                        <input type="number" id="budget" placeholder="例如：200" value="200" min="1" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="available-time">可用時間</label>
-                        <select id="available-time">
-                            <option value="10分鐘">10分鐘</option>
-                            <option value="20分鐘">20分鐘</option>
-                            <option value="30分鐘" selected>30分鐘</option>
-                            <option value="60分鐘">60分鐘</option>
-                            <option value="120分鐘">120分鐘</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="ingredients">現有食材 <span class="required">*</span></label>
-                    <input type="text" id="ingredients" placeholder="例如：雞蛋、洋蔥、高麗菜、豬肉" value="雞蛋、洋蔥、高麗菜、豬肉" required>
-                </div>
-
-                <div class="grid-3">
-                    <div class="form-group">
-                        <label for="servings">料理份數</label>
-                        <select id="servings">
-                            <option value="1人">1人</option>
-                            <option value="2人" selected>2人</option>
-                            <option value="3人">3人</option>
-                            <option value="4人">4人</option>
-                            <option value="5人">5人</option>
-                            <option value="6人以上">6人以上</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="taste-profile">預期口味</label>
-                        <select id="taste-profile">
-                            <option value="一般" selected>一般</option>
-                            <option value="清淡">清淡</option>
-                            <option value="濃郁">濃郁</option>
-                            <option value="偏甜">偏甜</option>
-                            <option value="偏鹹">偏鹹</option>
-                            <option value="偏辣">偏辣</option>
-                            <option value="麻辣">麻辣</option>
-                            <option value="酸甜">酸甜</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="target-audience">料理對象</label>
-                        <select id="target-audience">
-                            <option value="自己" selected>自己</option>
-                            <option value="家人">家人</option>
-                            <option value="長輩">長輩</option>
-                            <option value="小孩">小孩</option>
-                            <option value="同學">同學</option>
-                            <option value="朋友">朋友</option>
-                            <option value="伴侶">伴侶</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>擁有設備 (可複選)</label>
-                    <div class="checkbox-grid">
-                        <label class="checkbox-item"><input type="checkbox" name="equipment" value="電鍋"> 電鍋</label>
-                        <label class="checkbox-item"><input type="checkbox" name="equipment" value="氣炸鍋"> 氣炸鍋</label>
-                        <label class="checkbox-item"><input type="checkbox" name="equipment" value="微波爐"> 微波爐</label>
-                        <label class="checkbox-item"><input type="checkbox" name="equipment" value="平底鍋" checked> 平底鍋</label>
-                        <label class="checkbox-item"><input type="checkbox" name="equipment" value="炒鍋" checked> 炒鍋</label>
-                        <label class="checkbox-item"><input type="checkbox" name="equipment" value="烤箱"> 烤箱</label>
-                        <label class="checkbox-item"><input type="checkbox" name="equipment" value="電磁爐"> 電磁爐</label>
-                        <label class="checkbox-item"><input type="checkbox" name="equipment" value="壓力鍋"> 壓力鍋</label>
-                        <label class="checkbox-item"><input type="checkbox" name="equipment" value="慢燉鍋"> 慢燉鍋</label>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>營養需求 (可複選)</label>
-                    <div class="checkbox-grid">
-                        <label class="checkbox-item"><input type="checkbox" name="nutrition" value="高蛋白"> 高蛋白</label>
-                        <label class="checkbox-item"><input type="checkbox" name="nutrition" value="增肌"> 增肌</label>
-                        <label class="checkbox-item"><input type="checkbox" name="nutrition" value="減脂"> 減脂</label>
-                        <label class="checkbox-item"><input type="checkbox" name="nutrition" value="減醣"> 減醣</label>
-                        <label class="checkbox-item"><input type="checkbox" name="nutrition" value="高纖"> 高纖</label>
-                        <label class="checkbox-item"><input type="checkbox" name="nutrition" value="低鈉"> 低鈉</label>
-                        <label class="checkbox-item"><input type="checkbox" name="nutrition" value="低熱量"> 低熱量</label>
-                        <label class="checkbox-item"><input type="checkbox" name="nutrition" value="高熱量"> 高熱量</label>
-                        <label class="checkbox-item"><input type="checkbox" name="nutrition" value="素食"> 素食</label>
-                        <label class="checkbox-item"><input type="checkbox" name="nutrition" value="蛋奶素"> 蛋奶素</label>
-                    </div>
-                </div>
-
-                <button type="submit" id="btn-submit" class="btn btn-primary">🍽️ 生成智能食譜</button>
-            </form>
         </section>
 
         <section class="display-section">
+            
             <div id="loading-view" class="card hidden text-center">
                 <div class="spinner"></div>
-                <h3 class="margin-t-15">AI 主廚正在構思食譜...</h3>
-                <p class="text-muted">正在依據您的預算、食材、口味進行客製化科學配比分析</p>
+                <h3 id="loading-title" class="margin-t-15">AI 主廚正在構思中...</h3>
+                <p id="loading-desc" class="text-muted">正在依據您的限制進行多維度科學配比分析</p>
             </div>
 
             <div id="error-alert" class="alert alert-danger hidden">
                 <div class="alert-header">
-                    <strong>⚠️ 系統錯誤提示</strong>
+                    <strong>⚠️ 系統遭遇異常</strong>
                     <button id="close-error" class="btn-close">&times;</button>
                 </div>
                 <p id="error-message"></p>
             </div>
 
+            <div id="proposal-view" class="card hidden">
+                <h3 class="card-title" style="color: #e67e22;">💡 兩階段互動：請選擇您想展開的精選方案</h3>
+                <p class="text-secondary margin-b-15">以下為 AI 科學計算後最符合您條件的組合方案，請挑選一個生成細節：</p>
+                
+                <div id="proposal-list" class="proposal-container">
+                    </div>
+                
+                <button id="btn-trigger-recipe" class="btn btn-primary margin-t-15">🍳 2. 確定並解鎖精細套餐與完整食譜</button>
+            </div>
+
             <div id="result-view" class="card hidden">
                 <div class="result-header">
-                    <h2>🍳 AI 推薦優選企劃</h2>
+                    <h2 id="result-main-title">🍽️ AI 頂級全套客製化方案</h2>
                     <div class="action-buttons">
                         <button id="btn-copy" class="btn btn-secondary btn-sm">📋 複製內容</button>
                         <button id="btn-download" class="btn btn-secondary btn-sm">💾 下載 TXT</button>
                     </div>
                 </div>
 
-                <div id="condition-summary" class="summary-box">
-                    </div>
-                
-                <div id="ai-meta" class="meta-info text-right">
-                    </div>
-
+                <div id="condition-summary" class="summary-box"></div>
+                <div id="ai-meta" class="meta-info text-right"></div>
                 <hr class="divider">
-
-                <div id="recipe-content" class="markdown-rendered">
-                    </div>
+                <div id="recipe-content" class="markdown-rendered"></div>
             </div>
 
             <div class="card">
                 <div class="history-header">
-                    <h3>📚 歷史推薦紀錄</h3>
+                    <h3>📚 歷史紀錄存檔</h3>
                     <button id="btn-clear-history" class="btn btn-danger btn-sm">🗑️ 清空紀錄</button>
                 </div>
-                <ul id="history-list" class="history-list">
-                    </ul>
+                <ul id="history-list" class="history-list"></ul>
             </div>
         </section>
     </main>
 
     <footer class="footer">
-        <p>© 2026 AI 料理小幫手 - 您的個人廚藝與營養顧問專家</p>
+        <p>© 2026 AI 料理小幫手 Pro - 您的個人廚藝、一週菜單與營養顧問專家</p>
     </footer>
 
     <script src="script.js"></script>
