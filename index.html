@@ -78,13 +78,30 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="ingredients-input">現有食材設定 <span class="required">*</span></label>
-                        <input type="text" id="ingredients-input" placeholder="請輸入食材名稱（例如：牛肉、高麗菜、雞蛋），用逗號隔開或直接打字">
-                        <small class="help-text">輸入完食材後，下方會自動出現對應的重量(g)輸入框喔！</small>
-                        
-                        <div id="weight-fields-container" class="weight-container margin-t-15">
+                    <div class="form-group card-inner-box">
+                        <label>新增本次料理食材與重量 <span class="required">*</span></label>
+                        <div class="dynamic-input-row">
+                            <input type="text" id="instant-name-input" placeholder="食材名稱 (如：牛肉)">
+                            <div class="input-unit-group">
+                                <input type="number" id="instant-weight-input" placeholder="重量" min="1">
+                                <span class="unit-text">克(g)</span>
                             </div>
+                            <button type="button" id="btn-add-instant-ingredient" class="btn btn-secondary btn-sm">➕ 新增</button>
+                        </div>
+
+                        <div class="table-wrapper margin-t-15">
+                            <table class="ingredient-table">
+                               <thead>
+                                   <tr>
+                                       <th>食材名稱</th>
+                                       <th>設定重量 (g)</th>
+                                       <th style="width: 70px; text-align: center;">操作</th>
+                                   </tr>
+                               </thead>
+                               <tbody id="instant-ingredients-tbody">
+                                   </tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <div class="grid-3">
@@ -161,7 +178,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label>營養與健康目標 (可複選)</label>
+                        <label>營量與健康目標 (可複選)</label>
                         <div class="checkbox-grid">
                             <label class="checkbox-item"><input type="checkbox" name="nutrition" value="高蛋白"> 高蛋白</label>
                             <label class="checkbox-item"><input type="checkbox" name="nutrition" value="增肌"> 增肌</label>
