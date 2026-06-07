@@ -1,6 +1,6 @@
 /**
  * AI 料理小幫手 Pro 核心控制引擎
- * 內建 503 自動彈性重試機制、動態重量欄位與過敏原複選擴充
+ * 更新功能：優化即時料理推薦，改為按鍵新增、即時列表格的複數食材與重量動態輸入系統
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -20,11 +20,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
 
-    // 分頁一：即時料理推薦相關元件
+    // 分頁一：即時料理推薦相關新元件
     const recipeForm = document.getElementById('recipe-form');
     const btnSubmit = document.getElementById('btn-submit');
-    const ingredientsInput = document.getElementById('ingredients-input');
-    const weightFieldsContainer = document.getElementById('weight-fields-container');
+    const instantNameInput = document.getElementById('instant-name-input');
+    const instantWeightInput = document.getElementById('instant-weight-input');
+    const btnAddInstantIngredient = document.getElementById('btn-add-instant-ingredient');
+    const instantIngredientsTbody = document.getElementById('instant-ingredients-tbody');
+
     const proposalView = document.getElementById('proposal-view');
     const proposalList = document.getElementById('proposal-list');
     const btnTriggerRecipe = document.getElementById('btn-trigger-recipe');
@@ -43,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnGenerateWeek = document.getElementById('btn-generate-week');
 
     // 狀態暫存庫
+    let instantIngredients = []; // 即時料理的食材陣列 [{name: '牛肉', weight: 250}]
     let fridgeIngredients = [
         { name: '雞蛋', weight: 300 },
         { name: '高麗菜', weight: 500 },
@@ -63,9 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const savedTheme = localStorage.getItem('cooking_theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
 
+        renderInstantTable();
         renderFridgeTags();
         renderHistory();
-        triggerWeightFieldsUpdate(); // 初始化動態重量框
     }
 
     // 頁籤切換
@@ -80,57 +84,77 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /**
-     * 🔥 核心新增功能：輸入食材自動動態生成重量填寫欄位
+     * 🔥 核心改版功能：即時料理食材「一鍵填寫、右側列表格、無限續加」
      */
-    ingredientsInput.addEventListener('input', triggerWeightFieldsUpdate);
+    btnAddInstantIngredient.addEventListener('click', () => {
+        const name = instantNameInput.value.trim();
+        const weight = parseInt(instantWeightInput.value.trim());
 
-    function triggerWeightFieldsUpdate() {
-        const text = ingredientsInput.value;
-        // 支援中文或英文逗號、頓號隔開食材
-        const items = text.split(/[,，、\s]+/).map(i => i.trim()).filter(i => i.length > 0);
-        
-        if (items.length === 0) {
-            weightFieldsContainer.innerHTML = '<p class="text-muted" style="font-size:0.85rem; text-align:center;">暫無食材，請在上方欄位輸入食材名稱...</p>';
+        if (!name) {
+            alert('請輸入食材名稱！');
+            return;
+        }
+        if (!weight || weight <= 0) {
+            alert('請輸入有效的克數重量！');
             return;
         }
 
-        // 保留使用者原本已經填寫的重量，避免重新輸入時被清空
-        const oldWeights = {};
-        weightFieldsContainer.querySelectorAll('.weight-row').forEach(row => {
-            const name = row.getAttribute('data-name');
-            const val = row.querySelector('input').value;
-            oldWeights[name] = val;
+        // 如果輸入重複的菜，就直接累加克數
+        const existing = instantIngredients.find(item => item.name === name);
+        if (existing) {
+            existing.weight += weight;
+        } else {
+            instantIngredients.push({ name, weight });
+        }
+
+        // 清空輸入欄位，讓使用者可以點擊後「立刻輸入下一道菜」
+        instantNameInput.value = '';
+        instantWeightInput.value = '';
+        instantNameInput.focus();
+
+        renderInstantTable();
+    });
+
+    // 渲染即時料理食材表格
+    function renderInstantTable() {
+        instantIngredientsTbody.innerHTML = '';
+        
+        if (instantIngredients.length === 0) {
+            instantIngredientsTbody.innerHTML = `
+                <tr>
+                    <td colspan="3" class="text-muted" style="text-align: center; padding: 20px;">
+                        ⚠️ 尚未加入任何食材。請在上方輸入後點擊「新增」。
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        instantIngredients.forEach((item, idx) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>🥩 ${item.name}</strong></td>
+                <td>${item.weight} g</td>
+                <td style="text-align: center;">
+                    <button type="button" class="btn-delete-row" data-index="${idx}">&times;</button>
+                </td>
+            `;
+            instantIngredientsTbody.appendChild(tr);
         });
 
-        weightFieldsContainer.innerHTML = '';
-        items.forEach(item => {
-            const savedVal = oldWeights[item] || '200'; // 預設 200g
-            const row = document.createElement('div');
-            row.className = 'weight-row';
-            row.setAttribute('data-name', item);
-            row.innerHTML = `
-                <span class="weight-label">🥩 ${item}</span>
-                <div class="weight-input-wrapper">
-                    <input type="number" value="${savedVal}" min="1" placeholder="數量">
-                    <span class="text-muted">克(g)</span>
-                </div>
-            `;
-            weightFieldsContainer.appendChild(row);
+        // 綁定刪除事件
+        instantIngredientsTbody.querySelectorAll('.btn-delete-row').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(e.target.getAttribute('data-index'));
+                instantIngredients.splice(idx, 1);
+                renderInstantTable();
+            });
         });
     }
 
-    // 獲取目前所有動態食材與精確重量串接文字
-    function getFormattedIngredientsWithWeights() {
-        const rows = weightFieldsContainer.querySelectorAll('.weight-row');
-        if (rows.length === 0) return ingredientsInput.value;
-        
-        const result = [];
-        rows.forEach(row => {
-            const name = row.getAttribute('data-name');
-            const weight = row.querySelector('input').value;
-            result.push(`${name}(${weight}g)`);
-        });
-        return result.join('、');
+    // 轉換成 AI 看得懂的格式化食材字串
+    function getFormattedInstantString() {
+        return instantIngredients.map(i => `${i.name}(${i.weight}g)`).join('、');
     }
 
     // 冰箱食材增刪管理
@@ -205,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /**
-     * 階段一：生成多個方案 (內含過敏原複選與精確重量字串整合)
+     * 階段一：生成多個方案
      */
     recipeForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -217,15 +241,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!apiKey) return showError('請先輸入有效的 Gemini API Key。');
         localStorage.setItem('gemini_cooking_key', apiKey);
 
+        if (instantIngredients.length === 0) {
+            return showError('請至少在即時料理表格內新增一項食材與重量！');
+        }
+
         // 讀取複選資料
         const selectedAllergies = Array.from(document.querySelectorAll('input[name="allergy"]:checked')).map(el => el.value).join('、') || '無特殊過敏原';
         const selectedEquipments = Array.from(document.querySelectorAll('input[name="equipment"]:checked')).map(el => el.value).join('、') || '基本廚具';
         const selectedNutritions = Array.from(document.querySelectorAll('input[name="nutrition"]:checked')).map(el => el.value).join('、') || '平衡膳食';
-        const comprehensiveIngredients = getFormattedIngredientsWithWeights();
+        
+        const comprehensiveIngredients = getFormattedInstantString();
 
         lastSavedConfig = {
             cuisineType: document.getElementById('cuisine-type').value,
-            mealPeriod: document.getElementById('meal-period').value,
+            textMealPeriod: document.getElementById('meal-period').value,
             budget: document.getElementById('budget').value,
             availableTime: document.getElementById('available-time').value,
             ingredients: comprehensiveIngredients,
@@ -238,13 +267,13 @@ document.addEventListener('DOMContentLoaded', () => {
             nutritions: selectedNutritions
         };
 
-        setLoading(true, 'AI 主廚正在篩選多組可行方案...', '正在考慮您的精確食材重量、預算與複選過敏原...');
+        setLoading(true, 'AI 主廚正在篩選多組可行方案...', '正在考慮您的精確食材列表、預算與複選過敏原...');
 
         const proposalPrompt = `你是一位專業主廚與嚴格的營養師。請根據以下要求，設計出 3 個完全符合條件的「主菜+副菜+湯品」套餐方案，供使用者挑選。
 條件規格：
-- 料理類型: ${lastSavedConfig.cuisineType} | 時段: ${lastSavedConfig.mealPeriod}
+- 料理類型: ${lastSavedConfig.cuisineType} | 時段: ${lastSavedConfig.textMealPeriod}
 - 預算: ${lastSavedConfig.budget}元 TWD | 時間: ${lastSavedConfig.availableTime}
-- 帶重量食材: ${lastSavedConfig.ingredients} (請務必參考括號內克數安排合理的食材消耗比)
+- 表格帶重量食材: ${lastSavedConfig.ingredients} (請務必完全參考括號內克數安排合理的食材消耗比)
 - 份數: ${lastSavedConfig.servings} | 口味: ${lastSavedConfig.tasteProfile}
 - 對象: ${lastSavedConfig.targetAudience} | 模式: ${lastSavedConfig.aiMode}
 - 嚴格排除過敏原: ${lastSavedConfig.allergyExclude}
@@ -375,7 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /**
-     * 獨立功能區：🧊 冰箱料理規劃器 - 一週菜單生成 (已完全移除預算上限卡鎖)
+     * 獨立功能區：🧊 冰箱料理規劃器 - 一週菜單生成
      */
     btnGenerateWeek.addEventListener('click', async () => {
         errorAlert.classList.add('hidden');
