@@ -16,17 +16,14 @@
         </div>
     </header>
 
-    <!-- 模式切換頁籤 (Tabs) -->
     <div class="tab-container">
         <button class="tab-btn active" data-tab="tab-instant">🍳 即時料理推薦</button>
         <button class="tab-btn" data-tab="tab-fridge">🧊 冰箱模式 / 一週菜單</button>
     </div>
 
     <main class="main-container">
-        <!-- 左側：條件控制區 -->
         <section class="config-section">
             
-            <!-- 全域通用密鑰設定卡片 -->
             <div class="card api-card">
                 <div class="form-group margin-b-0">
                     <label for="api-key">Gemini API Key <span class="required">*</span></label>
@@ -35,7 +32,6 @@
                 </div>
             </div>
 
-            <!-- 分頁一：即時料理推薦控制表單 -->
             <div id="tab-instant" class="tab-content active">
                 <form id="recipe-form" class="card">
                     <h2 class="card-title">🛠️ 即時料理條件設定</h2>
@@ -83,8 +79,12 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="ingredients">現有食材 <span class="required">*</span></label>
-                        <input type="text" id="ingredients" placeholder="例如：雞蛋、洋蔥、高麗菜、豬肉" value="雞蛋、洋蔥、高麗菜、豬肉" required>
+                        <label for="ingredients-input">現有食材設定 <span class="required">*</span></label>
+                        <input type="text" id="ingredients-input" placeholder="請輸入食材名稱（例如：牛肉、高麗菜、雞蛋），用逗號隔開或直接打字">
+                        <small class="help-text">輸入完食材後，下方會自動出現對應的重量(g)輸入框喔！</small>
+                        
+                        <div id="weight-fields-container" class="weight-container margin-t-15">
+                            </div>
                     </div>
 
                     <div class="grid-3">
@@ -138,12 +138,12 @@
                     <div class="form-group">
                         <label>過敏原排除 (可複選)</label>
                         <div class="checkbox-grid">
-                            <label class="checkbox-item"><input type="checkbox" name="allergy" value="甲殼類/海鮮"> 海鮮/蝦蟹</label>
-                            <label class="checkbox-item"><input type="checkbox" name="allergy" value="蛋類"> 蛋類</label>
+                            <label class="checkbox-item"><input type="checkbox" name="allergy" value="海鮮"> 海鮮</label>
+                            <label class="checkbox-item"><input type="checkbox" name="allergy" value="堅果/花生"> 堅果/花生</label>
                             <label class="checkbox-item"><input type="checkbox" name="allergy" value="乳製品"> 乳製品</label>
-                            <label class="checkbox-item"><input type="checkbox" name="allergy" value="花生/堅果"> 花生堅果</label>
-                            <label class="checkbox-item"><input type="checkbox" name="allergy" value="大豆/黃豆"> 大豆製品</label>
-                            <label class="checkbox-item"><input type="checkbox" name="allergy" value="麩質/小麥"> 麩質小麥</label>
+                            <label class="checkbox-item"><input type="checkbox" name="allergy" value="蛋類"> 蛋類</label>
+                            <label class="checkbox-item"><input type="checkbox" name="allergy" value="麩質"> 麩質</label>
+                            <label class="checkbox-item"><input type="checkbox" name="allergy" value="大豆"> 大豆</label>
                         </div>
                     </div>
 
@@ -176,44 +176,32 @@
                 </form>
             </div>
 
-            <!-- 分頁二：冰箱料理規劃器 -->
             <div id="tab-fridge" class="tab-content">
                 <div class="card">
                     <h2 class="card-title">🧊 冰箱料理規劃器</h2>
-                    <p class="text-secondary margin-b-15">輸入您冰箱內現有的食材與剩餘量，AI 幫您規劃一週（7天）且不浪費的完整套餐。</p>
+                    <p class="text-secondary margin-b-15">輸入您冰箱內現有的所有食材與重量，AI 幫您規劃不浪費的一週 7 天完整全套菜單。</p>
                     
-                    <!-- 食材量輸入互動區組 -->
-                    <div class="fridge-flow-box">
-                        <div class="form-group" id="fridge-step-name-group">
-                            <label for="fridge-input">第一步：請輸入食材名稱</label>
-                            <div class="input-btn-group">
-                                <input type="text" id="fridge-input" placeholder="例如：牛肉、高麗菜、雞肉">
-                                <button type="button" id="btn-next-qty" class="btn btn-primary btn-sm" style="width: auto; white-space: nowrap;">下一步 ➡️</button>
-                            </div>
-                        </div>
-
-                        <div class="form-group hidden" id="fridge-step-qty-group">
-                            <label for="fridge-qty-input" id="fridge-qty-label">第二步：請問【食材】的數量/重量是？</label>
-                            <div class="input-btn-group">
-                                <input type="text" id="fridge-qty-input" placeholder="例如：300克、2顆、1半">
-                                <button type="button" id="btn-add-fridge" class="btn btn-success btn-sm" style="width: auto; white-space: nowrap;">➕ 加入清單</button>
-                            </div>
+                    <div class="form-group">
+                        <label>管理冰箱食材與精確重量</label>
+                        <div class="fridge-input-container">
+                            <input type="text" id="fridge-name-input" placeholder="食材名稱，如：牛肉">
+                            <input type="number" id="fridge-weight-input" placeholder="重量(g)，如：300" min="1">
+                            <button type="button" id="btn-add-fridge" class="btn btn-secondary btn-sm">➕ 新增</button>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label>目前冰箱庫存清單（含精確量）：</label>
+                        <label>目前冰箱清單（優先消耗項目）：</label>
                         <div id="fridge-tags-container" class="tags-container">
-                            <!-- 動態渲染食材 Tag -->
-                        </div>
+                            </div>
                     </div>
 
                     <div class="form-group">
                         <label for="fridge-mode">烹飪導向模式</label>
                         <select id="fridge-mode">
-                            <option value="平衡模式" selected>營養與口味平衡</option>
-                            <option value="嚴格減脂模式">高纖減脂控糖</option>
-                            <option value="高CP值精省模式">最大化利用現有食材</option>
+                            <option value="平衡模式" selected>營養與口味平衡模式</option>
+                            <option value="嚴格減脂模式">高纖減脂控糖模式</option>
+                            <option value="清空冰箱省錢模式">最大化食材利用、經濟實惠模式</option>
                         </select>
                     </div>
 
@@ -223,8 +211,8 @@
 
         </section>
 
-        <!-- 右側：資料顯示與互動區 -->
         <section class="display-section">
+            
             <div id="loading-view" class="card hidden text-center">
                 <div class="spinner"></div>
                 <h3 id="loading-title" class="margin-t-15">AI 主廚正在構思中...</h3>
@@ -233,36 +221,37 @@
 
             <div id="error-alert" class="alert alert-danger hidden">
                 <div class="alert-header">
-                    <strong>⚠️ 系統遭遇異常</strong>
+                    <strong>⚠️ 系統提示資訊</strong>
                     <button id="close-error" class="btn-close">&times;</button>
                 </div>
                 <p id="error-message"></p>
             </div>
 
-            <!-- 階段一：AI 生成多個料理方案選擇區 -->
             <div id="proposal-view" class="card hidden">
                 <h3 class="card-title" style="color: #e67e22;">💡 兩階段互動：請選擇您想展開的精選方案</h3>
                 <p class="text-secondary margin-b-15">以下為 AI 科學計算後最符合您條件的組合方案，請挑選一個生成細節：</p>
-                <div id="proposal-list" class="proposal-container"></div>
+                
+                <div id="proposal-list" class="proposal-container">
+                    </div>
+                
                 <button id="btn-trigger-recipe" class="btn btn-primary margin-t-15">🍳 2. 確定並解鎖精細套餐與完整食譜</button>
             </div>
 
-            <!-- 階段二：完整食譜與詳細方案顯示 -->
             <div id="result-view" class="card hidden">
                 <div class="result-header">
-                    <h2 id="result-main-title">🍽 Rose AI 客製化食譜方案</h2>
+                    <h2 id="result-main-title">🍽️ AI 頂級全套客製化方案</h2>
                     <div class="action-buttons">
                         <button id="btn-copy" class="btn btn-secondary btn-sm">📋 複製內容</button>
                         <button id="btn-download" class="btn btn-secondary btn-sm">💾 下載 TXT</button>
                     </div>
                 </div>
+
                 <div id="condition-summary" class="summary-box"></div>
                 <div id="ai-meta" class="meta-info text-right"></div>
                 <hr class="divider">
                 <div id="recipe-content" class="markdown-rendered"></div>
             </div>
 
-            <!-- 歷史紀錄 -->
             <div class="card">
                 <div class="history-header">
                     <h3>📚 歷史紀錄存檔</h3>
