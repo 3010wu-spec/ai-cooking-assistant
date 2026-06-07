@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
 ## 🥈 備選料理：[填入備選菜名]
 [此處請提供第二道替代菜餚的推薦原因、料理特色與簡要的做法步驟，格式亦須保持結構完整，不敷衍]`;
 
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
         // 設置 AbortController 以進行 50 秒的 Timeout 控制機制
         const controller = new AbortController();
